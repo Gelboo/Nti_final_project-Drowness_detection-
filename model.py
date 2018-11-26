@@ -4,10 +4,83 @@ import cv2
 import matplotlib.pyplot as plt
 # from PIL import Image
 #_______________******_________________*****___________________*****
-theLabels = np.array([[]],dtype='float')
+
+'''
+    this was for 2-D output layer
+'''
+# theLabels = np.array([[]],dtype='float')
+# theImages = []
+# # initalize with empty
+# lines=[]
+# num_points = 1
+# with open('HelenDataSet/__Annotation/1new.txt','r') as file:
+#     for line in file:
+#         line = line.replace('\n','')
+#         lines.append(line)
+# # print(lines)
+# # get the image title and remove the title from the lines
+# img_title = lines.pop(0)
+# label = np.array([[]],dtype='float')
+# for item in lines:
+#     values = item.split(',')
+#     label = np.append(label,np.array(values,dtype='float'))
+# label = label.reshape(num_points,2)
+# theLabels = label
+# theImages.append(img_title)
+# # print(label)
+# print(theLabels.shape)
+#
+# img = cv2.imread('HelenDataSet/{}.jpg'.format(img_title))
+# new_img_width = 200
+# new_img_height = 200
+# #_______________*****________________*****___________________****
+# # start from the second Image
+# num_images = 73
+# for i in range(2,num_images):
+#     lines = []
+#     file_path = "HelenDataSet/__Annotation/"+str(i)+"new.txt"
+#     with open(file_path,'r') as file:
+#         for line in file:
+#             line = line.replace('\n','')
+#             lines.append(line)
+#     # print(lines)
+#     # get the image title and remove the title from the lines
+#     img_title = lines.pop(0)
+#     label = np.array([[]],dtype='float')
+#     for item in lines:
+#         values = item.split(',')
+#         label = np.append(label,np.array(values,dtype='float'))
+#     label = label.reshape(num_points,2)
+#     # print(theLabels.shape)
+#     # print(label.shape)
+#     theLabels = np.vstack((theLabels,label))
+#     theImages.append(img_title)
+#     # print(label)
+#
+#     img = cv2.imread('HelenDataSet/{}.jpg'.format(img_title))
+#     new_img_width = 200
+#     new_img_height = 200
+#
+#     # img = cv2.resize(img,(new_img_width,new_img_height))
+#     # update label point
+# theLabels = theLabels.reshape((num_images-1,num_points,2))
+# print(theLabels.shape)
+# # for lb in theLabels:
+# #     print("start *** -___---")
+# #     print(lb)
+# #     print("end *** -+____--")
+# # print(theLabels)
+# # print(theImages)
+
+
+'''
+ make the label be flatten with shape (388,)
+'''
+theLabels = np.array([],dtype='float')
 theImages = []
 # initalize with empty
 lines=[]
+num_points = 194
 with open('HelenDataSet/__Annotation/1new.txt','r') as file:
     for line in file:
         line = line.replace('\n','')
@@ -15,22 +88,22 @@ with open('HelenDataSet/__Annotation/1new.txt','r') as file:
 # print(lines)
 # get the image title and remove the title from the lines
 img_title = lines.pop(0)
-label = np.array([[]],dtype='float')
+label = np.array([],dtype='float')
 for item in lines:
     values = item.split(',')
     label = np.append(label,np.array(values,dtype='float'))
-label = label.reshape(194,2)
 theLabels = label
 theImages.append(img_title)
 # print(label)
 print(theLabels.shape)
+# print(theLabels)
 
 img = cv2.imread('HelenDataSet/{}.jpg'.format(img_title))
 new_img_width = 200
 new_img_height = 200
 #_______________*****________________*****___________________****
 # start from the second Image
-num_images = 73
+num_images = 2330
 for i in range(2,num_images):
     lines = []
     file_path = "HelenDataSet/__Annotation/"+str(i)+"new.txt"
@@ -41,16 +114,15 @@ for i in range(2,num_images):
     # print(lines)
     # get the image title and remove the title from the lines
     img_title = lines.pop(0)
-    label = np.array([[]],dtype='float')
+    label = []
     for item in lines:
         values = item.split(',')
         label = np.append(label,np.array(values,dtype='float'))
-    label = label.reshape(194,2)
-    # print(theLabels.shape)
-    # print(label.shape)
-    theLabels = np.vstack((theLabels,label))
+    theLabels = np.append(theLabels,label)
     theImages.append(img_title)
     # print(label)
+    # print(theLabels.shape)
+    # print(theLabels)
 
     img = cv2.imread('HelenDataSet/{}.jpg'.format(img_title))
     new_img_width = 200
@@ -58,7 +130,8 @@ for i in range(2,num_images):
 
     # img = cv2.resize(img,(new_img_width,new_img_height))
     # update label point
-theLabels = theLabels.reshape((num_images-1,194,2))
+theLabels = theLabels.reshape((num_images-1,num_points*2))
+print("the Labels shape")
 print(theLabels.shape)
 # for lb in theLabels:
 #     print("start *** -___---")
@@ -66,6 +139,7 @@ print(theLabels.shape)
 #     print("end *** -+____--")
 # print(theLabels)
 # print(theImages)
+
 
 def prepare_X_Y():
     images = np.array([np.array(cv2.resize(cv2.imread('HelenDataSet/'+img+'.jpg'),(200,200))) for img in theImages])
@@ -142,8 +216,10 @@ uptill = int(len(x_train)*0.8)
 (x_train,x_valid) = x_train[:uptill],x_train[uptill:]
 (y_train,y_valid) = y_train[:uptill],y_train[uptill:]
 #
+print("x_train_shape")
 print(x_train.shape)
 print(x_valid.shape)
+print("y_train_shape")
 print(y_train.shape)
 print(y_valid.shape)
 #
@@ -170,13 +246,21 @@ model2.add(Conv2D(filters=64,kernel_size=2,padding='same',activation='relu'))
 model2.add(MaxPooling2D(pool_size=2))
 model2.add(Conv2D(filters=64,kernel_size=2,padding='same',activation='relu'))
 model2.add(MaxPooling2D(pool_size=2))
+model2.add(Conv2D(filters=128,kernel_size=2,padding='same',activation='relu'))
+model2.add(MaxPooling2D(pool_size=2))
+model2.add(Conv2D(filters=256,kernel_size=2,padding='same',activation='relu'))
+model2.add(MaxPooling2D(pool_size=2))
+model2.add(Conv2D(filters=512,kernel_size=2,padding='same',activation='relu'))
+model2.add(MaxPooling2D(pool_size=2))
 
 model2.add(Dropout(0.2))
 model2.add(Flatten())
+model2.add(Dense(1000,activation='relu'))
+model2.add(Dropout(0.2))
 model2.add(Dense(500,activation='relu'))
 model2.add(Dropout(0.2))
 
-model2.add(Dense(2,activation='softmax'))
+model2.add(Dense(388,activation='relu'))
 model2.summary()
 
 #compile the model
