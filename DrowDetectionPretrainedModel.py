@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# encoding: utf-8
 # import the necessary packages
 from scipy.spatial import distance as dist
 from imutils.video import VideoStream
@@ -35,11 +37,15 @@ def eye_aspect_ratio(eye):
 
 	# return the eye aspect ratio
 	return ear
+def show_sleep_image(img):
+	cv2.imshow('sleepFrame',img)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--shape-predictor", required=True,
+ap.add_argument("-p", "--shape-predictor",default="shape_predictor_68_face_landmarks.dat",
 	help="path to facial landmark predictor")
-ap.add_argument("-a", "--alarm", type=str, default="",
+ap.add_argument("-a", "--alarm", type=str, default="truckAlarm.wav",
 	help="path alarm .WAV file")
 ap.add_argument("-w", "--webcam", type=int, default=0,
 	help="index of webcam on system")
@@ -72,7 +78,7 @@ predictor = dlib.shape_predictor(args["shape_predictor"])
 print("[INFO] starting video stream thread...")
 vs = VideoStream(src=args["webcam"]).start()
 time.sleep(1.0)
-
+showImage = False
 # loop over frames from the video stream
 while True:
 	# grab the frame from the threaded video file stream, resize
@@ -107,7 +113,7 @@ while True:
 		# visualize each of the eyes
 		leftEyeHull = cv2.convexHull(leftEye)
 		rightEyeHull = cv2.convexHull(rightEye)
-		cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+		cv2.drawContours(frame, [leftEyeHull], -1, (70, 100, 200), 1)
 		cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
 		# check to see if the eye aspect ratio is below the blink
@@ -130,7 +136,11 @@ while True:
 							args=(args["alarm"],))
 						t.deamon = True
 						t.start()
-
+					if showImage:
+						t2 = Thread(target=show_sleep_image,
+							args=(frame,))
+						t2.deamon = True
+						t2.start()
 				# draw an alarm on the frame
 				cv2.putText(frame, "DROWSINESS ALERT!", (10, 30),
 					cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
