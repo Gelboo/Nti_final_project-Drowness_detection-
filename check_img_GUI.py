@@ -14,7 +14,18 @@ left_eye_img = None
 right_eye_img = None
 
 def load_image():
-    global original_img_lbl,img_name
+    global original_img_lbl,img_name,face_img_lbl,leftEye_img_lbl,rightEye_img_lbl
+    leftEye_img_lbl.config(image=None)
+    leftEye_img_lbl.image=None
+
+    rightEye_img_lbl.config(image=None)
+    rightEye_img_lbl.image=None
+
+    face_img_lbl.config(image=None)
+    face_img_lbl.image=None
+
+    original_img_lbl.config(image=None)
+    original_img_lbl.image = None
     Tk().withdraw() # we don't want a full GuI , so keep root window appear
     img_name = askopenfilename()
     img = cv2.imread(img_name)
@@ -31,9 +42,13 @@ def load_image():
 
     original_img_lbl.config(image=img)
     original_img_lbl.image = img
+
+
+
 def get_component():
     global original_img_lbl,img_name,face_img_lbl,leftEye_img_lbl,rightEye_img_lbl,left_eye_img,right_eye_img
     img = cv2.imread(img_name)
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     img,faces,eyes = get_parts(img)
     img = cv2.resize(img,(800,850))
     img = Image.fromarray(img)
@@ -69,12 +84,14 @@ def get_component():
     rightEye_img_lbl.config(image=right_eye)
     rightEye_img_lbl.image=right_eye
 def check_status():
-    global left_eye_img,right_eye_img
+    global left_eye_img,right_eye_img,Res_value
     if left_eye_img is None or right_eye_img is None:
         messagebox.showinfo(title="warning",message="There is no eye Component \n Please check")
     res_left = get_status(left_eye_img,'left_eye')
     res_right = get_status(right_eye_img,'right_eye')
     print(res_left,res_right)
+    Res_value.config(text=res_left+" \n "+res_right)
+    Res_value.text = res_left+" \n "+res_right
 
 root = Tk()
 
@@ -98,9 +115,9 @@ rightEye_img_lbl = Label(root,bg='white')
 
 check_status_btn = Button(root,text="Check The person Status",width=20,height=2,fg='black',bg='yellow',font='Calibri 20',command=check_status)
 Res_lbl = Label(root,text="Res:",font='Calibri 20',bg='blue',fg='white')
+Res_value = Label(root,text='',font='Calibri 20',bg='blue',fg='red')
 
-
-load_btn.place(x=100,y=50)
+load_btn.place(x=0,y=50)
 get_image_component_btn.place(x=450,y=50)
 original_img_lbl.place(x=1100,y=50)
 original_img_PH.place(x=1100,y=50)
@@ -112,4 +129,5 @@ leftEye_img_lbl.place(x=20,y=700)
 rightEye_img_lbl.place(x=580,y=700)
 check_status_btn.place(x=1200,y=960)
 Res_lbl.place(x=1700,y=940)
+Res_value.place(x=1700,y=980)
 root.mainloop()
